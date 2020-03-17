@@ -184,6 +184,15 @@ class Profile(models.Model):
 
         return queryset
 
+    def get_user_public_contents_as_publishable_queryset(self, _type=None):
+        """
+        :param _type: if provided, request a specific type of content
+        :return: Queryset of contents (PublishableContent and not PublishedContent)with this user as author.
+        """
+        published_contents = self.get_user_public_contents_queryset(_type)
+        queryset = PublishableContent.objects.filter(public_version__in=list(published_contents))
+        return queryset
+
     def get_content_count(self, _type=None):
         """
         :param _type: if provided, request a specific type of content

@@ -2110,12 +2110,16 @@ class ContentOfAuthor(ZdSPagingListView):
         return super(ContentOfAuthor, self).dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        if self.type == 'ALL':
-            queryset = PublishableContent.objects.filter(authors__pk__in=[self.user.pk])
-        elif self.type in list(TYPE_CHOICES_DICT.keys()):
-            queryset = PublishableContent.objects.filter(authors__pk__in=[self.user.pk], type=self.type)
-        else:
+        profile = get_object_or_404(Profile, pk=self.user.pk)
+        if self.type not in list(TYPE_CHOICES_DICT.keys()):
             raise Http404('Ce type de contenu est inconnu dans le système.')
+        _type = self.type
+        if self.type == 'ALL':
+            _type = None
+        if 'filter' in self.request.GET and self.request.GET.get('filter').lower() == 'public':
+            queryset = profile.get_user_public_contents_as_publishable_queryset(_type=_type)
+        else:
+            queryset = profile.get_user_contents_queryset(_type=_type)
 
         # prefetch:
         queryset = queryset\
