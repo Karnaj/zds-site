@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from zds.forum.models import Post, Topic
 from zds.member import NEW_PROVIDER_USES
 from zds.member.managers import ProfileManager
-from zds.tutorialv2.models.database import PublishableContent, PublishedContent
+from zds.tutorialv2.models.database import PublishableContent
 from zds.utils.models import Alert, Licence, Hat
 
 from zds.forum.models import Forum
@@ -177,20 +177,11 @@ class Profile(models.Model):
         :param _type: if provided, request a specific type of content
         :return: Queryset of contents with this user as author.
         """
-        queryset = PublishedContent.objects.filter(authors__in=[self.user])
+        queryset = PublishableContent.objects.filter(public_version__authors__in=[self.user])
 
         if _type:
-            queryset = queryset.filter(content_type=_type)
+            queryset = queryset.filter(type=_type)
 
-        return queryset
-
-    def get_user_public_contents_as_publishable_queryset(self, _type=None):
-        """
-        :param _type: if provided, request a specific type of content
-        :return: Queryset of contents (PublishableContent and not PublishedContent)with this user as author.
-        """
-        published_contents = self.get_user_public_contents_queryset(_type)
-        queryset = PublishableContent.objects.filter(public_version__in=list(published_contents))
         return queryset
 
     def get_content_count(self, _type=None):
@@ -228,7 +219,7 @@ class Profile(models.Model):
         :param _type: if provided, request a specific type of content
         :return: All published contents with this user as author.
         """
-        return self.get_user_public_contents_queryset(_type).filter(must_redirect=False).all()
+        return self.get_user_public_contents_queryset(_type).all()
 
     def get_validate_contents(self, _type=None):
         """

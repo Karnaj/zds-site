@@ -2117,7 +2117,7 @@ class ContentOfAuthor(ZdSPagingListView):
         if self.type == 'ALL':
             _type = None
         if 'filter' in self.request.GET and self.request.GET.get('filter').lower() == 'public':
-            queryset = profile.get_user_public_contents_as_publishable_queryset(_type=_type)
+            queryset = profile.get_user_public_contents_queryset(_type=_type)
         else:
             queryset = profile.get_user_contents_queryset(_type=_type)
 
